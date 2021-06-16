@@ -4,14 +4,18 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 
 import com.ck.dev.swipeviewdemo.interfaces.OnSwipeEvent;
-
 
 public class SwipeDetector implements View.OnTouchListener {
 
     private final View parent;
     private short MIN_DISTANCE = 50;
+    private short LONG_PRESS_SENSITIVITY = 100;
+
+    private float downX;
+    private float downY;
 
     private OnSwipeEvent swipeEventListener;
 
@@ -83,6 +87,69 @@ public class SwipeDetector implements View.OnTouchListener {
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
+        switch(event.getAction()){
+            case MotionEvent.ACTION_DOWN: {
+                downX = event.getX();
+                downY = event.getY();
+                if (handler != null) {
+                    handler.postDelayed(onLongPressedEvent, ViewConfiguration.getLongPressTimeout());
+                }
+                return true;
+            }
+            case MotionEvent.ACTION_MOVE :
+                float dX = downX - event.getX();
+                float dY = downY - event.getY();
+
+                onSwipeMovementValue(dX, dY);
+                if (Math.abs(dX) > LONG_PRESS_SENSITIVITY || Math.abs(dY) > LONG_PRESS_SENSITIVITY) {
+                    if (handler != null) {
+                        handler.removeCallbacks(onLongPressedEvent);
+                    }
+                }
+                break;
+            case MotionEvent.ACTION_UP: {
+                if (handler != null) {
+                    handler.removeCallbacks(onLongPressedEvent);
+                }
+                float upX = event.getX();
+                float upY = event.getY();
+
+                float deltaX = downX - upX;
+                float deltaY = downY - upY;
+
+                //HORIZONTAL SCROLL
+                if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                    if (Math.abs(deltaX) > MIN_DISTANCE) {
+                        // left or right
+                        if (deltaX < 0) {
+                            this.onLeftToRightSwipe();
+                            return true;
+                        } else if (deltaX > 0) {
+                            this.onRightToLeftSwipe();
+                            return true;
+                        }
+                    } else {
+                        this.onTapEventDetected(upX, upY);
+                        return true;
+                    }
+                } else { //VERTICAL SCROLL
+                    if (Math.abs(deltaY) > MIN_DISTANCE) {
+                        // top or down
+                        if (deltaY < 0) {
+                            this.onTopToBottomSwipe();
+                            return true;
+                        } else if (deltaY > 0) {
+                            this.onBottomToTopSwipe();
+                            return true;
+                        }
+                    } else {
+                        this.onTapEventDetected(upX, upY);
+                        return true;
+                    }
+                } //VERTICAL SCROLL
+                return true;
+            }
+        }
         return false;
     } // onTouch
 
@@ -93,5 +160,13 @@ public class SwipeDetector implements View.OnTouchListener {
     public void setMinDistance(short MIN_DISTANCE) {
         this.MIN_DISTANCE = MIN_DISTANCE;
     } // setMinDistance
+
+    public short getLongPressSensitivity() {
+        return LONG_PRESS_SENSITIVITY;
+    } // getLongPressSensitivity
+
+    public void setLongPressSensitivity(short LONG_PRESS_SENSITIVITY) {
+        this.LONG_PRESS_SENSITIVITY = LONG_PRESS_SENSITIVITY;
+    } // setLongPressSensitivity
 
 } // SwipeDetector
