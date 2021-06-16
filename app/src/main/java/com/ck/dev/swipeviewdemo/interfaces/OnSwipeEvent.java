@@ -8,6 +8,6 @@ public interface OnSwipeEvent {
 
     void swipeEventDetected(View v, SwipeType swipeType);
     void swipeMovementValue(float valueX, float valueY);
-    void tapEventDetected(float valueX, float valueY);
+    void tapEventDetected(View v, float valueX, float valueY);
 
 }
