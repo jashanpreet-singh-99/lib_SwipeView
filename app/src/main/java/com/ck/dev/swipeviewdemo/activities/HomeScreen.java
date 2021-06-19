@@ -1,14 +1,16 @@
-package com.ck.dev.swipeviewdemo;
+package com.ck.dev.swipeviewdemo.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 
-public class MainActivity extends AppCompatActivity {
+import com.ck.dev.swipeviewdemo.R;
+
+public class HomeScreen extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.layout_home_screen);
     }
 }
