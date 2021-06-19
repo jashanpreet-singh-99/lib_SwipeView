@@ -8,6 +8,7 @@ import android.widget.LinearLayout;
 
 import com.ck.dev.swipeviewdemo.R;
 import com.ck.dev.swipeviewdemo.interfaces.OnSwipeEvent;
+import com.ck.dev.swipeviewdemo.utils.Config;
 import com.ck.dev.swipeviewdemo.utils.SwipeDetector;
 import com.ck.dev.swipeviewdemo.utils.SwipeType;
 
@@ -36,15 +37,17 @@ public class HomeScreen extends AppCompatActivity {
             public void swipeEventDetected(View v, SwipeType swipeType) {
                 switch(swipeType) {
                     case BOTTOM_TO_TOP:
+                        Config.LOG(Config.TAG_HOME_SCREEN, "Bottom to top", false);
                         break;
                     case TOP_TO_BOTTOM:
+                        Config.LOG(Config.TAG_HOME_SCREEN, "Top to bottom", false);
                         break;
                 }
             }
 
             @Override
             public void swipeMovementValue(float valueX, float valueY) {
-                if (valueX <= 0)
+                if (valueX <= 10)
                     return;
 
                 float change = swipeDetectorView.getHeight() - valueY;
