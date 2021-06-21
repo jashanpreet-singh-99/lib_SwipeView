@@ -117,6 +117,7 @@ public class SwipeDetector implements View.OnTouchListener {
         @Override
         public void run() {
             DRAG_MODE = true;
+            Config.LOG(Config.TAG_SWIPE_DETECTOR, "Run : Drag enabled.", false);
         }
     };
 
@@ -127,10 +128,12 @@ public class SwipeDetector implements View.OnTouchListener {
                 downX = event.getX();
                 downY = event.getY();
                 if (handler != null) {
-                    if (draggable)
+                    if (draggable) {
                         handler.postDelayed(callDragEvent, ViewConfiguration.getLongPressTimeout());
-                    else
+                        Config.LOG(Config.TAG_SWIPE_DETECTOR, "Drag started.", false);
+                    } else {
                         handler.postDelayed(onLongPressedEvent, ViewConfiguration.getLongPressTimeout());
+                    }
                 }
                 return true;
             }
@@ -155,7 +158,6 @@ public class SwipeDetector implements View.OnTouchListener {
                         handler.removeCallbacks(callDragEvent);
                         Config.LOG(Config.TAG_SWIPE_DETECTOR, "onTouch : Drag disabled.", false);
                         DRAG_MODE = false;
-                        return true;
                     } else
                         handler.removeCallbacks(onLongPressedEvent);
                 }

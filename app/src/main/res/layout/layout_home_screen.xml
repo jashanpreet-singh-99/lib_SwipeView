@@ -26,7 +26,7 @@
             <Button
                 android:id="@+id/btn_1"
                 android:layout_width="60dp"
-                android:layout_height="60dp"
+                android:layout_height="200dp"
                 android:layout_margin="10dp"/>
 
             <Space
@@ -37,7 +37,7 @@
             <Button
                 android:id="@+id/btn_2"
                 android:layout_width="60dp"
-                android:layout_height="60dp"
+                android:layout_height="200dp"
                 android:layout_margin="10dp"/>
 
             <Space
@@ -48,7 +48,7 @@
             <Button
                 android:id="@+id/btn_3"
                 android:layout_width="60dp"
-                android:layout_height="60dp"
+                android:layout_height="200dp"
                 android:layout_margin="10dp"/>
 
             <Space
@@ -59,7 +59,7 @@
             <Button
                 android:id="@+id/btn_4"
                 android:layout_width="60dp"
-                android:layout_height="60dp"
+                android:layout_height="200dp"
                 android:layout_margin="10dp"/>
 
             <Space

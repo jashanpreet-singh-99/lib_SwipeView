@@ -81,6 +81,12 @@ public class HomeScreen extends AppCompatActivity {
 
             @Override
             public void swipeMovementValue(float valueX, float valueY) {
+                int LIMIT = 50;
+                if (valueX < LIMIT && valueX > -LIMIT) {
+                    return;
+                } else if (valueY < LIMIT && valueY > -LIMIT) {
+                    return;
+                }
                 Config.LOG(Config.TAG_HOME_SCREEN, "Swiped X:" + valueX + " Y:" + valueY, false);
             }
 
@@ -91,6 +97,12 @@ public class HomeScreen extends AppCompatActivity {
 
             @Override
             public void onDraggedValue(float valueX, float valueY) {
+                int LIMIT = 50;
+                if (valueX < LIMIT && valueX > -LIMIT) {
+                    return;
+                } else if (valueY < LIMIT && valueY > -LIMIT) {
+                    return;
+                }
                 Config.LOG(Config.TAG_HOME_SCREEN, "dragged X:" + valueX + " Y:" + valueY, false);
             }
         };
