@@ -17,11 +17,14 @@ public class SwipeDetector implements View.OnTouchListener {
     private float downX;
     private float downY;
 
+    private boolean draggable;
+
+    private boolean DRAG_MODE;
+
     private OnSwipeEvent swipeEventListener;
 
     private final Handler handler;
     private Runnable onLongPressedEvent;
-    private Runnable btnDrag;
 
     public SwipeDetector(View parent) {
         this.parent = parent;
@@ -29,11 +32,26 @@ public class SwipeDetector implements View.OnTouchListener {
         this.handler = null;
     } // SwipeDetector
 
+    public SwipeDetector(View parent, boolean draggable) {
+        this.parent = parent;
+        this.parent.setOnTouchListener(this);
+        this.handler = null;
+        this.draggable = draggable;
+    } // SwipeDetector
+
     public SwipeDetector(View parent, Runnable onLongPressedEvent) {
         this.parent = parent;
         this.parent.setOnTouchListener(this);
         this.handler = new Handler(Looper.getMainLooper());
         this.onLongPressedEvent = onLongPressedEvent;
+    } // SwipeDetector
+
+    public SwipeDetector(View parent, Runnable onLongPressedEvent, boolean draggable) {
+        this.parent = parent;
+        this.parent.setOnTouchListener(this);
+        this.handler = new Handler(Looper.getMainLooper());
+        this.onLongPressedEvent = onLongPressedEvent;
+        this.draggable = draggable;
     } // SwipeDetector
 
     public void setOnSwipeListener(OnSwipeEvent listener) {
@@ -100,7 +118,10 @@ public class SwipeDetector implements View.OnTouchListener {
                 downX = event.getX();
                 downY = event.getY();
                 if (handler != null) {
-                    handler.postDelayed(onLongPressedEvent, ViewConfiguration.getLongPressTimeout());
+                    if (draggable) {
+                        DRAG_MODE = true;
+                    } else
+                        handler.postDelayed(onLongPressedEvent, ViewConfiguration.getLongPressTimeout());
                 }
                 return true;
             }
@@ -108,16 +129,23 @@ public class SwipeDetector implements View.OnTouchListener {
                 float dX = downX - event.getX();
                 float dY = downY - event.getY();
 
-                onSwipeMovementValue(dX, dY);
-                if (Math.abs(dX) > LONG_PRESS_SENSITIVITY || Math.abs(dY) > LONG_PRESS_SENSITIVITY) {
-                    if (handler != null) {
-                        handler.removeCallbacks(onLongPressedEvent);
+                if (DRAG_MODE)
+                    onDraggedValue(dX, dY);
+                else {
+                    onSwipeMovementValue(dX, dY);
+                    if (Math.abs(dX) > LONG_PRESS_SENSITIVITY || Math.abs(dY) > LONG_PRESS_SENSITIVITY) {
+                        if (handler != null) {
+                            handler.removeCallbacks(onLongPressedEvent);
+                        }
                     }
                 }
                 break;
             case MotionEvent.ACTION_UP: {
                 if (handler != null) {
-                    handler.removeCallbacks(onLongPressedEvent);
+                    if (draggable)
+                        DRAG_MODE = false;
+                    else
+                        handler.removeCallbacks(onLongPressedEvent);
                 }
                 float upX = event.getX();
                 float upY = event.getY();
