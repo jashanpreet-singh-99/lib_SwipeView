@@ -6,8 +6,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 
-import androidx.core.view.ViewConfigurationCompat;
-
 import com.ck.dev.swipeviewdemo.interfaces.OnSwipeEvent;
 
 public class SwipeDetector implements View.OnTouchListener {
