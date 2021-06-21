@@ -21,6 +21,7 @@ public class SwipeDetector implements View.OnTouchListener {
 
     private final Handler handler;
     private Runnable onLongPressedEvent;
+    private Runnable btnDrag;
 
     public SwipeDetector(View parent) {
         this.parent = parent;
@@ -39,7 +40,7 @@ public class SwipeDetector implements View.OnTouchListener {
         try {
             swipeEventListener = listener;
         } catch (ClassCastException e) {
-            Config.LOG(Config.TAG_SWIPE_DETECTOR, "setOnSwipeListener : " + e.getMessage(), false);
+            Config.LOG(Config.TAG_SWIPE_DETECTOR, "setOnSwipeListener : " + e.getMessage(), true);
         }
     } // setOnSwipeListener
 
@@ -47,42 +48,49 @@ public class SwipeDetector implements View.OnTouchListener {
         if (swipeEventListener != null) {
             swipeEventListener.tapEventDetected(parent, valueX, valueY);
         } else
-            Config.LOG(Config.TAG_SWIPE_DETECTOR, "onTapEventDetected : OnSwipeEvent is null.", false);
+            Config.LOG(Config.TAG_SWIPE_DETECTOR, "onTapEventDetected : OnSwipeEvent is null.", true);
     } // onTapEventDetected
 
     public void onSwipeMovementValue(float valueX, float valueY) {
         if (swipeEventListener != null) {
             swipeEventListener.swipeMovementValue(valueX, valueY);
         } else
-            Config.LOG(Config.TAG_SWIPE_DETECTOR, "onSwipeMovementValue : OnSwipeEvent is null.", false);
+            Config.LOG(Config.TAG_SWIPE_DETECTOR, "onSwipeMovementValue : OnSwipeEvent is null.", true);
     } // onSwipeMovementValue
+
+    public void onDraggedValue(float valueX, float valueY){
+        if (swipeEventListener != null) {
+            swipeEventListener.onDraggedValue(valueX, valueY);
+        } else
+            Config.LOG(Config.TAG_SWIPE_DETECTOR, "onDraggedValue : OnSwipeEvent is null.", true);
+    } // onDraggedValue
 
     public void onRightToLeftSwipe() {
         if (swipeEventListener != null) {
             swipeEventListener.swipeEventDetected(parent, SwipeType.RIGHT_TO_LEFT);
         } else
-            Config.LOG(Config.TAG_SWIPE_DETECTOR, "onRightToLeftSwipe : OnSwipeEvent is null.", false);
+            Config.LOG(Config.TAG_SWIPE_DETECTOR, "onRightToLeftSwipe : OnSwipeEvent is null.", true);
     } // onRightToLeftSwipe
 
     public void onLeftToRightSwipe() {
         if (swipeEventListener != null) {
             swipeEventListener.swipeEventDetected(parent, SwipeType.LEFT_TO_RIGHT);
         } else
-            Config.LOG(Config.TAG_SWIPE_DETECTOR, "onLeftToRightSwipe : OnSwipeEvent is null.", false);
+            Config.LOG(Config.TAG_SWIPE_DETECTOR, "onLeftToRightSwipe : OnSwipeEvent is null.", true);
     } // onLeftToRightSwipe
 
     public void onTopToBottomSwipe() {
         if (swipeEventListener != null) {
             swipeEventListener.swipeEventDetected(parent, SwipeType.TOP_TO_BOTTOM);
         } else
-            Config.LOG(Config.TAG_SWIPE_DETECTOR, "onTopToBottomSwipe : OnSwipeEvent is null.", false);
+            Config.LOG(Config.TAG_SWIPE_DETECTOR, "onTopToBottomSwipe : OnSwipeEvent is null.", true);
     } // onTopToBottomSwipe
 
     public void onBottomToTopSwipe() {
         if (swipeEventListener != null) {
             swipeEventListener.swipeEventDetected(parent, SwipeType.BOTTOM_TO_TOP);
         } else
-            Config.LOG(Config.TAG_SWIPE_DETECTOR, "onBottomToTopSwipe : OnSwipeEvent is null.", false);
+            Config.LOG(Config.TAG_SWIPE_DETECTOR, "onBottomToTopSwipe : OnSwipeEvent is null.", true);
     } // onBottomToTopSwipe
 
     @Override

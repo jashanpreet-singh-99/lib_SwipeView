@@ -1,11 +1,11 @@
 package com.ck.dev.swipeviewdemo.activities;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.ck.dev.swipeviewdemo.R;
 import com.ck.dev.swipeviewdemo.interfaces.OnSwipeEvent;
@@ -72,8 +72,9 @@ public class HomeScreen extends AppCompatActivity {
         });
 
         Runnable btnLongPress = () -> Config.LOG(Config.TAG_HOME_SCREEN, "Long pressed.", false);
+        Runnable btnDrag      = () -> Config.LOG(Config.TAG_HOME_SCREEN, "Long pressed.", false);
 
-        new SwipeDetector(btn1, btnLongPress).setOnSwipeListener(new OnSwipeEvent() {
+        OnSwipeEvent onSwipeEvent = new OnSwipeEvent() {
             @Override
             public void swipeEventDetected(View v, SwipeType swipeType) {
 
@@ -88,57 +89,15 @@ public class HomeScreen extends AppCompatActivity {
             public void tapEventDetected(View v, float valueX, float valueY) {
 
             }
-        });
 
-        new SwipeDetector(btn2, btnLongPress).setOnSwipeListener(new OnSwipeEvent() {
-            @Override
-            public void swipeEventDetected(View v, SwipeType swipeType) {
+        };
 
-            }
+        new SwipeDetector(btn1, btnLongPress).setOnSwipeListener(onSwipeEvent);
 
-            @Override
-            public void swipeMovementValue(float valueX, float valueY) {
+        new SwipeDetector(btn2, btnLongPress).setOnSwipeListener(onSwipeEvent);
 
-            }
+        new SwipeDetector(btn3, btnLongPress).setOnSwipeListener(onSwipeEvent);
 
-            @Override
-            public void tapEventDetected(View v, float valueX, float valueY) {
-
-            }
-        });
-
-        new SwipeDetector(btn3, btnLongPress).setOnSwipeListener(new OnSwipeEvent() {
-            @Override
-            public void swipeEventDetected(View v, SwipeType swipeType) {
-
-            }
-
-            @Override
-            public void swipeMovementValue(float valueX, float valueY) {
-
-            }
-
-            @Override
-            public void tapEventDetected(View v, float valueX, float valueY) {
-
-            }
-        });
-
-        new SwipeDetector(btn4, btnLongPress).setOnSwipeListener(new OnSwipeEvent() {
-            @Override
-            public void swipeEventDetected(View v, SwipeType swipeType) {
-
-            }
-
-            @Override
-            public void swipeMovementValue(float valueX, float valueY) {
-
-            }
-
-            @Override
-            public void tapEventDetected(View v, float valueX, float valueY) {
-
-            }
-        });
+        new SwipeDetector(btn4, btnLongPress).setOnSwipeListener(onSwipeEvent);
     }
 }
