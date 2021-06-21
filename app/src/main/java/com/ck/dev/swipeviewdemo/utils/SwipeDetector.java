@@ -6,6 +6,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 
+import androidx.core.view.ViewConfigurationCompat;
+
 import com.ck.dev.swipeviewdemo.interfaces.OnSwipeEvent;
 
 public class SwipeDetector implements View.OnTouchListener {
@@ -35,7 +37,7 @@ public class SwipeDetector implements View.OnTouchListener {
     public SwipeDetector(View parent, boolean draggable) {
         this.parent = parent;
         this.parent.setOnTouchListener(this);
-        this.handler = null;
+        this.handler = new Handler(Looper.getMainLooper());
         this.draggable = draggable;
     } // SwipeDetector
 
@@ -111,6 +113,13 @@ public class SwipeDetector implements View.OnTouchListener {
             Config.LOG(Config.TAG_SWIPE_DETECTOR, "onBottomToTopSwipe : OnSwipeEvent is null.", true);
     } // onBottomToTopSwipe
 
+    Runnable callDragEvent = new Runnable() {
+        @Override
+        public void run() {
+            DRAG_MODE = true;
+        }
+    };
+
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         switch(event.getAction()){
@@ -118,9 +127,9 @@ public class SwipeDetector implements View.OnTouchListener {
                 downX = event.getX();
                 downY = event.getY();
                 if (handler != null) {
-                    if (draggable) {
-                        DRAG_MODE = true;
-                    } else
+                    if (draggable)
+                        handler.postDelayed(callDragEvent, ViewConfiguration.getLongPressTimeout());
+                    else
                         handler.postDelayed(onLongPressedEvent, ViewConfiguration.getLongPressTimeout());
                 }
                 return true;
@@ -142,9 +151,12 @@ public class SwipeDetector implements View.OnTouchListener {
                 break;
             case MotionEvent.ACTION_UP: {
                 if (handler != null) {
-                    if (draggable)
+                    if (draggable && DRAG_MODE) {
+                        handler.removeCallbacks(callDragEvent);
+                        Config.LOG(Config.TAG_SWIPE_DETECTOR, "onTouch : Drag disabled.", false);
                         DRAG_MODE = false;
-                    else
+                        return true;
+                    } else
                         handler.removeCallbacks(onLongPressedEvent);
                 }
                 float upX = event.getX();

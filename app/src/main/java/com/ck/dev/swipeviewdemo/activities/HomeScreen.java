@@ -76,22 +76,22 @@ public class HomeScreen extends AppCompatActivity {
         OnSwipeEvent onSwipeEvent = new OnSwipeEvent() {
             @Override
             public void swipeEventDetected(View v, SwipeType swipeType) {
-
+                Config.LOG(Config.TAG_HOME_SCREEN, "Swipe direction:" + swipeType, false);
             }
 
             @Override
             public void swipeMovementValue(float valueX, float valueY) {
-
+                Config.LOG(Config.TAG_HOME_SCREEN, "Swiped X:" + valueX + " Y:" + valueY, false);
             }
 
             @Override
             public void tapEventDetected(View v, float valueX, float valueY) {
-
+                Config.LOG(Config.TAG_HOME_SCREEN, "Click Detected", false);
             }
 
             @Override
-            public void onDraggedValue(float dX, float dY) {
-                Config.LOG(Config.TAG_HOME_SCREEN, "dragged X:" + dX + " Y:" + dY, false);
+            public void onDraggedValue(float valueX, float valueY) {
+                Config.LOG(Config.TAG_HOME_SCREEN, "dragged X:" + valueX + " Y:" + valueY, false);
             }
         };
 
