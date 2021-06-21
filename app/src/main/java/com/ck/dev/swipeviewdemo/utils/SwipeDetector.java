@@ -158,6 +158,7 @@ public class SwipeDetector implements View.OnTouchListener {
                         handler.removeCallbacks(callDragEvent);
                         Config.LOG(Config.TAG_SWIPE_DETECTOR, "onTouch : Drag disabled.", false);
                         DRAG_MODE = false;
+                        return true;
                     } else
                         handler.removeCallbacks(onLongPressedEvent);
                 }
