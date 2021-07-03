@@ -14,6 +14,8 @@ public class SwipeDetector implements View.OnTouchListener {
     private short MIN_DISTANCE = 50;
     private short LONG_PRESS_SENSITIVITY = 100;
 
+    private final int DRAG_EVENT_DELAY = 1000;
+
     private float downX;
     private float downY;
 
@@ -23,35 +25,27 @@ public class SwipeDetector implements View.OnTouchListener {
 
     private OnSwipeEvent swipeEventListener;
 
-    private final Handler handler;
-    private Runnable onLongPressedEvent;
+    private Handler handler = null;
 
     public SwipeDetector(View parent) {
         this.parent = parent;
         this.parent.setOnTouchListener(this);
-        this.handler = null;
     } // SwipeDetector
 
-    public SwipeDetector(View parent, boolean draggable) {
+    public SwipeDetector(View parent, boolean onLongPress) {
         this.parent = parent;
         this.parent.setOnTouchListener(this);
-        this.handler = new Handler(Looper.getMainLooper());
+        if (onLongPress)
+            this.handler = new Handler(Looper.getMainLooper());
+    } // SwipeDetector
+
+    public SwipeDetector(View parent, boolean onLongPress, boolean draggable) {
+        this.parent = parent;
+        this.parent.setOnTouchListener(this);
+
         this.draggable = draggable;
-    } // SwipeDetector
-
-    public SwipeDetector(View parent, Runnable onLongPressedEvent) {
-        this.parent = parent;
-        this.parent.setOnTouchListener(this);
-        this.handler = new Handler(Looper.getMainLooper());
-        this.onLongPressedEvent = onLongPressedEvent;
-    } // SwipeDetector
-
-    public SwipeDetector(View parent, Runnable onLongPressedEvent, boolean draggable) {
-        this.parent = parent;
-        this.parent.setOnTouchListener(this);
-        this.handler = new Handler(Looper.getMainLooper());
-        this.onLongPressedEvent = onLongPressedEvent;
-        this.draggable = draggable;
+        if (onLongPress || draggable)
+            this.handler = new Handler(Looper.getMainLooper());
     } // SwipeDetector
 
     public void setOnSwipeListener(OnSwipeEvent listener) {
@@ -62,62 +56,87 @@ public class SwipeDetector implements View.OnTouchListener {
         }
     } // setOnSwipeListener
 
-    public void onTapEventDetected(float valueX, float valueY) {
+    private void onTapEventDetected(float valueX, float valueY) {
         if (swipeEventListener != null) {
             swipeEventListener.tapEventDetected(parent, valueX, valueY);
         } else
             Config.LOG(Config.TAG_SWIPE_DETECTOR, "onTapEventDetected : OnSwipeEvent is null.", true);
     } // onTapEventDetected
 
-    public void onSwipeMovementValue(float valueX, float valueY) {
+    private void onSwipeMovementValue(float valueX, float valueY) {
         if (swipeEventListener != null) {
             swipeEventListener.swipeMovementValue(valueX, valueY);
         } else
             Config.LOG(Config.TAG_SWIPE_DETECTOR, "onSwipeMovementValue : OnSwipeEvent is null.", true);
     } // onSwipeMovementValue
 
-    public void onDraggedValue(float valueX, float valueY){
+    private void onDragEventStart(){
+        if (swipeEventListener != null) {
+            swipeEventListener.onDragEventStart();
+        } else
+            Config.LOG(Config.TAG_SWIPE_DETECTOR, "onDragEventStart : OnSwipeEvent is null.", true);
+    } // onDragEventStart
+
+    private void onDraggedValue(float valueX, float valueY){
         if (swipeEventListener != null) {
             swipeEventListener.onDraggedValue(valueX, valueY);
         } else
             Config.LOG(Config.TAG_SWIPE_DETECTOR, "onDraggedValue : OnSwipeEvent is null.", true);
     } // onDraggedValue
 
-    public void onRightToLeftSwipe() {
+    private void onDragEventEnd(){
+        if (swipeEventListener != null) {
+            swipeEventListener.onDragEventEnd();
+        } else
+            Config.LOG(Config.TAG_SWIPE_DETECTOR, "onDragEventEnd : OnSwipeEvent is null.", true);
+    } // onDragEventEnd
+
+    private void onRightToLeftSwipe() {
         if (swipeEventListener != null) {
             swipeEventListener.swipeEventDetected(parent, SwipeType.RIGHT_TO_LEFT);
         } else
             Config.LOG(Config.TAG_SWIPE_DETECTOR, "onRightToLeftSwipe : OnSwipeEvent is null.", true);
     } // onRightToLeftSwipe
 
-    public void onLeftToRightSwipe() {
+    private void onLeftToRightSwipe() {
         if (swipeEventListener != null) {
             swipeEventListener.swipeEventDetected(parent, SwipeType.LEFT_TO_RIGHT);
         } else
             Config.LOG(Config.TAG_SWIPE_DETECTOR, "onLeftToRightSwipe : OnSwipeEvent is null.", true);
     } // onLeftToRightSwipe
 
-    public void onTopToBottomSwipe() {
+    private void onTopToBottomSwipe() {
         if (swipeEventListener != null) {
             swipeEventListener.swipeEventDetected(parent, SwipeType.TOP_TO_BOTTOM);
         } else
             Config.LOG(Config.TAG_SWIPE_DETECTOR, "onTopToBottomSwipe : OnSwipeEvent is null.", true);
     } // onTopToBottomSwipe
 
-    public void onBottomToTopSwipe() {
+    private void onBottomToTopSwipe() {
         if (swipeEventListener != null) {
             swipeEventListener.swipeEventDetected(parent, SwipeType.BOTTOM_TO_TOP);
         } else
             Config.LOG(Config.TAG_SWIPE_DETECTOR, "onBottomToTopSwipe : OnSwipeEvent is null.", true);
     } // onBottomToTopSwipe
 
-    Runnable callDragEvent = new Runnable() {
+    private final Runnable callDragEvent = new Runnable() {
         @Override
         public void run() {
             DRAG_MODE = true;
             Config.LOG(Config.TAG_SWIPE_DETECTOR, "Run : Drag enabled.", false);
+            onDragEventStart();
         }
-    };
+    }; // callDragEvent
+
+    private final Runnable onLongPressedEvent = new Runnable() {
+        @Override
+        public void run() {
+            if (swipeEventListener != null) {
+                swipeEventListener.onLongPress();
+            } else
+                Config.LOG(Config.TAG_SWIPE_DETECTOR, "onLongPressedEvent : OnSwipeEvent is null.", true);
+        }
+    }; // onLongPressedEvent
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
@@ -127,8 +146,8 @@ public class SwipeDetector implements View.OnTouchListener {
                 downY = event.getY();
                 if (handler != null) {
                     if (draggable) {
-                        handler.postDelayed(callDragEvent, ViewConfiguration.getLongPressTimeout());
-                        Config.LOG(Config.TAG_SWIPE_DETECTOR, "Drag started.", false);
+                        handler.postDelayed(callDragEvent, DRAG_EVENT_DELAY);
+                        Config.LOG(Config.TAG_SWIPE_DETECTOR, "Drag called.", false);
                     } else {
                         handler.postDelayed(onLongPressedEvent, ViewConfiguration.getLongPressTimeout());
                     }
@@ -146,17 +165,22 @@ public class SwipeDetector implements View.OnTouchListener {
                     if (Math.abs(dX) > LONG_PRESS_SENSITIVITY || Math.abs(dY) > LONG_PRESS_SENSITIVITY) {
                         if (handler != null) {
                             handler.removeCallbacks(onLongPressedEvent);
+                            if (draggable)
+                                handler.removeCallbacks(callDragEvent);
                         }
                     }
                 }
                 break;
             case MotionEvent.ACTION_UP: {
                 if (handler != null) {
-                    if (draggable && DRAG_MODE) {
+                    if (draggable) {
                         handler.removeCallbacks(callDragEvent);
-                        Config.LOG(Config.TAG_SWIPE_DETECTOR, "onTouch : Drag disabled.", false);
-                        DRAG_MODE = false;
-                        return true;
+                        if (DRAG_MODE) {
+                            Config.LOG(Config.TAG_SWIPE_DETECTOR, "onTouch : Drag disabled.", false);
+                            DRAG_MODE = false;
+                            onDragEventEnd();
+                            return true;
+                        }
                     } else
                         handler.removeCallbacks(onLongPressedEvent);
                 }

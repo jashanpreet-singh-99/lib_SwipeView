@@ -71,8 +71,6 @@ public class HomeScreen extends AppCompatActivity {
             }
         });
 
-        Runnable btnLongPress = () -> Config.LOG(Config.TAG_HOME_SCREEN, "Long pressed.", false);
-
         OnSwipeEvent onSwipeEvent = new OnSwipeEvent() {
             @Override
             public void swipeEventDetected(View v, SwipeType swipeType) {
@@ -105,14 +103,19 @@ public class HomeScreen extends AppCompatActivity {
                 }
                 Config.LOG(Config.TAG_HOME_SCREEN, "dragged X:" + valueX + " Y:" + valueY, false);
             }
+
+            @Override
+            public void onLongPress() {
+                Config.LOG(Config.TAG_HOME_SCREEN, "Long pressed.", false);
+            }
         };
 
-        new SwipeDetector(btn1, btnLongPress, true).setOnSwipeListener(onSwipeEvent);
+        new SwipeDetector(btn1, true, true).setOnSwipeListener(onSwipeEvent);
 
-        new SwipeDetector(btn2, btnLongPress, true).setOnSwipeListener(onSwipeEvent);
+        new SwipeDetector(btn2, true, true).setOnSwipeListener(onSwipeEvent);
 
-        new SwipeDetector(btn3, btnLongPress).setOnSwipeListener(onSwipeEvent);
+        new SwipeDetector(btn3, true).setOnSwipeListener(onSwipeEvent);
 
-        new SwipeDetector(btn4, btnLongPress).setOnSwipeListener(onSwipeEvent);
+        new SwipeDetector(btn4, true).setOnSwipeListener(onSwipeEvent);
     }
 }
