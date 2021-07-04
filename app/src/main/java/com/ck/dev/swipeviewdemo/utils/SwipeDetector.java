@@ -14,14 +14,19 @@ public class SwipeDetector implements View.OnTouchListener {
     private short MIN_DISTANCE = 50;
     private short LONG_PRESS_SENSITIVITY = 100;
 
-    private final int DRAG_EVENT_DELAY = 1000;
+    private int DRAG_EVENT_DELAY = 1000;
 
     private float downX;
     private float downY;
 
     private boolean draggable;
+    private boolean onLongPress;
+    private boolean onLongPressEventRunning;
 
     private boolean DRAG_MODE;
+    private boolean DRAG_SHIT;
+
+    private int DRAG_LIMIT = 25;
 
     private OnSwipeEvent swipeEventListener;
 
@@ -35,6 +40,7 @@ public class SwipeDetector implements View.OnTouchListener {
     public SwipeDetector(View parent, boolean onLongPress) {
         this.parent = parent;
         this.parent.setOnTouchListener(this);
+        this.onLongPress = onLongPress;
         if (onLongPress)
             this.handler = new Handler(Looper.getMainLooper());
     } // SwipeDetector
@@ -42,7 +48,7 @@ public class SwipeDetector implements View.OnTouchListener {
     public SwipeDetector(View parent, boolean onLongPress, boolean draggable) {
         this.parent = parent;
         this.parent.setOnTouchListener(this);
-
+        this.onLongPress = onLongPress;
         this.draggable = draggable;
         if (onLongPress || draggable)
             this.handler = new Handler(Looper.getMainLooper());
@@ -63,6 +69,22 @@ public class SwipeDetector implements View.OnTouchListener {
             Config.LOG(Config.TAG_SWIPE_DETECTOR, "onTapEventDetected : OnSwipeEvent is null.", true);
     } // onTapEventDetected
 
+    private void onLongPressedEvent() {
+        if (swipeEventListener != null) {
+            swipeEventListener.onLongPress();
+            onLongPressEventRunning = true;
+        } else
+            Config.LOG(Config.TAG_SWIPE_DETECTOR, "onLongPressedEvent : OnSwipeEvent is null.", true);
+    } // onLongPressedEvent
+
+    private void onLongPressEventCancel() {
+        if (swipeEventListener != null) {
+            swipeEventListener.onLongPressEventCancel();
+            onLongPressEventRunning = false;
+        } else
+            Config.LOG(Config.TAG_SWIPE_DETECTOR, "onLongPressEventCancel : OnSwipeEvent is null.", true);
+    } // onLongPressEventCancel
+
     private void onSwipeMovementValue(float valueX, float valueY) {
         if (swipeEventListener != null) {
             swipeEventListener.swipeMovementValue(valueX, valueY);
@@ -71,6 +93,9 @@ public class SwipeDetector implements View.OnTouchListener {
     } // onSwipeMovementValue
 
     private void onDragEventStart(){
+        if (onLongPressEventRunning)
+            onLongPressEventCancel();
+        Config.LOG(Config.TAG_SWIPE_DETECTOR, "Run : Drag enabled.", false);
         if (swipeEventListener != null) {
             swipeEventListener.onDragEventStart();
         } else
@@ -122,21 +147,15 @@ public class SwipeDetector implements View.OnTouchListener {
     private final Runnable callDragEvent = new Runnable() {
         @Override
         public void run() {
+            if (onLongPress) {
+                onLongPressedEvent();
+            }
             DRAG_MODE = true;
-            Config.LOG(Config.TAG_SWIPE_DETECTOR, "Run : Drag enabled.", false);
-            onDragEventStart();
+            DRAG_SHIT = false;
         }
     }; // callDragEvent
 
-    private final Runnable onLongPressedEvent = new Runnable() {
-        @Override
-        public void run() {
-            if (swipeEventListener != null) {
-                swipeEventListener.onLongPress();
-            } else
-                Config.LOG(Config.TAG_SWIPE_DETECTOR, "onLongPressedEvent : OnSwipeEvent is null.", true);
-        }
-    }; // onLongPressedEvent
+    private final Runnable onLongPressedEvent = this::onLongPressedEvent; // onLongPressedEvent
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
@@ -158,15 +177,27 @@ public class SwipeDetector implements View.OnTouchListener {
                 float dX = downX - event.getX();
                 float dY = downY - event.getY();
 
-                if (DRAG_MODE)
-                    onDraggedValue(dX, dY);
-                else {
+                if (DRAG_MODE) {
+                    if (dX >= DRAG_LIMIT || dX <= -DRAG_LIMIT || dY >= DRAG_LIMIT || dY <= -DRAG_LIMIT) {
+                        if (!DRAG_SHIT) {
+                            DRAG_SHIT = true;
+                            onDragEventStart();
+                        }
+                    }
+                    if (DRAG_SHIT) {
+                        onDraggedValue(dX, dY);
+                        break;
+                    }
+                }
+                if (!onLongPressEventRunning) {
                     onSwipeMovementValue(dX, dY);
                     if (Math.abs(dX) > LONG_PRESS_SENSITIVITY || Math.abs(dY) > LONG_PRESS_SENSITIVITY) {
                         if (handler != null) {
                             handler.removeCallbacks(onLongPressedEvent);
-                            if (draggable)
+                            if (draggable) {
                                 handler.removeCallbacks(callDragEvent);
+                                DRAG_SHIT = false;
+                            }
                         }
                     }
                 }
@@ -175,6 +206,7 @@ public class SwipeDetector implements View.OnTouchListener {
                 if (handler != null) {
                     if (draggable) {
                         handler.removeCallbacks(callDragEvent);
+                        DRAG_SHIT = false;
                         if (DRAG_MODE) {
                             Config.LOG(Config.TAG_SWIPE_DETECTOR, "onTouch : Drag disabled.", false);
                             DRAG_MODE = false;
@@ -241,5 +273,21 @@ public class SwipeDetector implements View.OnTouchListener {
     public void setLongPressSensitivity(short LONG_PRESS_SENSITIVITY) {
         this.LONG_PRESS_SENSITIVITY = LONG_PRESS_SENSITIVITY;
     } // setLongPressSensitivity
+
+    public int getDragEventDelay() {
+        return DRAG_EVENT_DELAY;
+    } // getDragEventDelay
+
+    public int getDragLimit() {
+        return DRAG_LIMIT;
+    } // getDragLimit
+
+    public void setDragEventDelay(int DRAG_EVENT_DELAY) {
+        this.DRAG_EVENT_DELAY = DRAG_EVENT_DELAY;
+    } // setDragEventDelay
+
+    public void setDragLimit(int DRAG_LIMIT) {
+        this.DRAG_LIMIT = DRAG_LIMIT;
+    } // setDragLimit
 
 } // SwipeDetector

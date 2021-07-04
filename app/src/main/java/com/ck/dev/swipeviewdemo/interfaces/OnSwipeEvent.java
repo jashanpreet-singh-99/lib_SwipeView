@@ -20,6 +20,10 @@ public interface OnSwipeEvent {
         Config.LOG(Config.TAG_SWIPE_DETECTOR, "OnLongPress.", false);
     } // onLongPress
 
+    default void onLongPressEventCancel() {
+        Config.LOG(Config.TAG_SWIPE_DETECTOR, "onLongPressEventCancel.", false);
+    } // onLongPressEventCancel
+
     default void onDragEventStart() {
         Config.LOG(Config.TAG_SWIPE_DETECTOR, "onDragEventStart.", false);
     } // onDragEventStart
